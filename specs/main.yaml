@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title:  Rest API
+  description: All Item Rest API End Points
+  version: V-2024-04
+servers:
+  - url:
+tags:
+  - name: Auth
+    description: All about authentication and authorization
+paths:
+  /sign-in:
+    post:
+      tags:
+        - Auth
+      summary: authenticate user
+      description: get access token after identified the user
+      operationId: authenticate
+      requestBody:
+        description: data that contain the credentials of the user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequestDTO'
+      responses:
+        201:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenDTO'
+  /register:
+    post:
+      tags:
+        - Auth
+      summary: Create a new user
+      description: Create a new user
+      operationId: createUser
+      requestBody:
+        description: data that need to be use for create User
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequestDTO'
+      responses:
+        201:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationDTO'
+  /user:
+    get:
+      tags:
+        - Auth
+      summary: get current User
+      description: get current User
+      operationId: getCurrentUser
+      parameters:
+        - name: extractCode
+          in: query
+          required: true
+          description: the code which specifies the number of fields you wish to retrieve
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+    put:
+      tags:
+        - Auth
+      summary: update an user
+      description: update an user
+      operationId: updateUser
+      requestBody:
+        description: Data that will be used to modify the user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDTO'
+      responses:
+        204:
+          description: successful operation
+  /image/upload:
+    post:
+      tags:
+        - Image
+      summary: Upload an image
+      description: Upload an image
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDTO'
+  /image/{imageId}:
+    get:
+      tags:
+        - Image
+      summary: get image by id
+      description: download image
+      operationId: getImageById
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: Image Not Found
+  /publication:
+    post:
+      tags:
+        - Publication
+      summary: Create a new publication
+      description: Create a new publication
+      operationId: createPublication
+      requestBody:
+        required: true
+        description: data that need to be use for create Publication
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePublicationDTO'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+                description: publication ID created
+  /publication/{publicationId}/publish:
+    put:
+      tags:
+        - Publication
+      summary: Post a new publication
+      description: Post a new publication
+      operationId: postPublication
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: successful operation
+  /publication/{publicationId}/remove:
+    put:
+      tags:
+        - Publication
+      summary: Remove a publication
+      description: Remove new publication
+      operationId: removePublication
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: successful operation
+  /publication/{publicationId}:
+    put:
+      tags:
+        - Publication
+      summary: update an publication
+      description: update an publication
+      operationId: updatePublication
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Data that will be used to modify the publication
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePublicationDTO'
+      responses:
+        204:
+          description: successful operation
+
+components:
+  schemas:
+    TokenDTO:
+      type: object
+      properties:
+        value:
+          type: string
+    AuthenticationRequestDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    RegistrationRequestDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/GenderDTO'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberDTO'
+        profileImageId:
+          type: string
+          format: uuid
+          description: User image ID
+    RegistrationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: created user ID
+        accessToken:
+          $ref: '#/components/schemas/TokenDTO'
+    PhoneNumberDTO:
+      type: object
+      properties:
+        countryCode:
+          type: string
+        number:
+          type: string
+    GenderDTO:
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identifier of user
+        email:
+          type: string
+        firstname:
+          type: string
+          description: user firstname
+        lastname:
+          type: string
+          description: user lastname
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/GenderDTO'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberDTO'
+        profileImageId:
+          type: string
+          format: uuid
+    UpdateUserDTO:
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: user firstname
+        lastname:
+          type: string
+          description: user lastname
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/GenderDTO'
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberDTO'
+        profileImageId:
+          type: string
+          format: uuid
+    ImageDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: image id
+    CurrencyDTO:
+      type: string
+      enum:
+        - XAF
+    MoneyDTO:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+        currency:
+          $ref: '#/components/schemas/CurrencyDTO'
+    CreatePublicationDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          description: title of the publication
+        description:
+          type: string
+          description: Content of publication
+        price:
+          $ref: '#/components/schemas/MoneyDTO'
+        allImageIds:
+          type: array
+          description: images ID list
+          items:
+            type: string
+            format: uuid
+    UpdatePublicationDTO:
+      type: object
+      properties:
+        title:
+          type: string
+          description: title of the publication
+        description:
+          type: string
+          description: Content of publication
+        price:
+          $ref: '#/components/schemas/MoneyDTO'
+        allImageIds:
+          type: array
+          description: images ID list
+          items:
+            type: string
+            format: uuid
